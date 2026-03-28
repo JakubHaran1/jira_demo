@@ -11,8 +11,8 @@ class Project(models.Model):
     name = models.CharField(max_length=70)
     description = models.CharField(max_length=150)
     owner = models.ForeignKey(
-        User,  on_delete=models.CASCADE, related_name='project')
-    members = models.ManyToManyField(User)
+        User,  on_delete=models.CASCADE, related_name='owner_of_projects')
+    members = models.ManyToManyField(User, related_name='member_in_projects')
     created_at = models.DateField()
 
 
@@ -25,7 +25,8 @@ class Column(models.Model):
     }
     status_type = models.CharField(max_length=50, choices=STATUS_CHOICES)
     name = models.CharField(max_length=50)
-    project = models.ForeignKey(Project, related_name='columns')
+    project = models.ForeignKey(
+        Project, related_name='columns', on_delete=models.CASCADE)
     order = models.PositiveIntegerField(default=0)
 
 
@@ -54,7 +55,7 @@ class ProjectMembership(models.Model):
         ('developer', 'Developer'),
         ('viewer', 'Viewer'),
     ]
-    user = models.ForeignKey(User,
+    user = models.ForeignKey(User, related_name='project_memberships',
                              on_delete=models.CASCADE)
     project = models.ForeignKey(
         Project, related_name="project_memberships", on_delete=models.CASCADE)
@@ -63,8 +64,18 @@ class ProjectMembership(models.Model):
 
 class Comment(models.Model):
     task = models.ForeignKey(
-        Task, related_name='tasks', on_delete=models.CASCADE)
+        Task, related_name='comments', on_delete=models.CASCADE)
     author = models.ForeignKey(
         User, related_name="comments", on_delete=models.CASCADE)
     content = models.CharField(max_length=250)
     created_at = models.DateField(auto_now_add=True)
+
+
+class ActivityLog(models.Model):
+    user = models.ForeignKey(User,
+                             on_delete=models.CASCADE, related_name='activity_logs')
+
+    action = models.CharField(max_length=50)
+    task = models.ForeignKey(
+        Task, related_name='activity_logs', on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
