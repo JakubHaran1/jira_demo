@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
 from rest_framework.exceptions import ValidationError
 
 from rest_framework.fields import CharField
@@ -35,16 +35,10 @@ class UserCreateSerializer(ModelSerializer):
         user.save()
 
 
-class ProjectSerializer(ModelSerializer):
-    class Meta:
-        model = Project
-        fields = ["__all__"]
-
-
 class ColumnSerializer(ModelSerializer):
     class Meta:
         model = Column
-        fields = ["__all__"]
+        fields = ["status_type", "name", "order"]
 
 
 class TaskSerializer(ModelSerializer):
@@ -54,9 +48,31 @@ class TaskSerializer(ModelSerializer):
 
 
 class ProjectMembershipSerializer(ModelSerializer):
+    user = PrimaryKeyRelatedField(queryset=User.objects.all())
+
     class Meta:
         model = ProjectMembership
-        fields = ["__all__"]
+        fields = ["user", "role"]
+
+
+class ProjectSerializer(ModelSerializer):
+    project_memberships = ProjectMembershipSerializer(many=True)
+    columns = ColumnSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Project
+        fields = ["name", "description", "created_at",
+                  "columns", "project_memberships"]
+
+    def create(self, validated_data):
+
+        project_memberships_data = validated_data.pop("project_memberships")
+        project_instance = Project.objects.create(**validated_data)
+        print("tr", project_memberships_data)
+        for data in project_memberships_data:
+            ProjectMembership.objects.create(project=project_instance, **data)
+
+        return project_instance
 
 
 class CommentSerializer(ModelSerializer):
