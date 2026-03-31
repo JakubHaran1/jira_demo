@@ -24,8 +24,8 @@ class UserCreateSerializer(ModelSerializer):
     def validate(self, attrs):
         attrs = super().validate(attrs)
         if attrs["password"] != attrs["confirm_password"]:
-            raise ValidationError(
-                "Password and confirm password isn't the same")
+            raise ValidationError({"confirm_password":
+                                   "Password and confirm password isn't the same"})
         return attrs
 
     def create(self, validated_data):
@@ -35,16 +35,41 @@ class UserCreateSerializer(ModelSerializer):
         user.save()
 
 
-class ColumnSerializer(ModelSerializer):
+class CommentSerializer(ModelSerializer):
     class Meta:
-        model = Column
-        fields = ["status_type", "name", "order"]
+        model = Comment
+        fields = ["task", "author", "content", "created_at"]
 
 
 class TaskSerializer(ModelSerializer):
+    created_by = UserSerializer(read_only=True)
+    assigned_to = UserSerializer(read_only=True, many=True)
+
+    assigned_to_ids = PrimaryKeyRelatedField(
+        queryset=User.objects.all(), many=True, write_only=True)
+
+    column = PrimaryKeyRelatedField(queryset=Column.objects.all())
+    comments = CommentSerializer(many=True, read_only=True)
+
     class Meta:
         model = Task
-        fields = ["__all__"]
+        fields = ["id", "title", "description",
+                  "priority", "due_date", "created_at", 'column', "assigned_to_ids", "created_by", "assigned_to", "comments"]
+
+    def create(self, validated_data):
+        ids_data = validated_data.pop("assigned_to_ids", [])
+        task_instance = Task.objects.create(**validated_data)
+        task_instance.assigned_to.set(ids_data)
+        return task_instance
+        # dodać aktualizacja - add,update
+
+
+class ColumnSerializer(ModelSerializer):
+    tasks = TaskSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Column
+        fields = ["status_type", "project", "name", "order", "tasks"]
 
 
 class ProjectMembershipSerializer(ModelSerializer):
@@ -65,20 +90,16 @@ class ProjectSerializer(ModelSerializer):
                   "columns", "project_memberships"]
 
     def create(self, validated_data):
-
+        request = self.context["request"]
         project_memberships_data = validated_data.pop("project_memberships")
         project_instance = Project.objects.create(**validated_data)
-        print("tr", project_memberships_data)
-        for data in project_memberships_data:
-            ProjectMembership.objects.create(project=project_instance, **data)
+        ProjectMembership.objects.create(
+            project=project_instance,
+            user=request.user,
+            role="manager"
+        )
 
         return project_instance
-
-
-class CommentSerializer(ModelSerializer):
-    class Meta:
-        model = Comment
-        fields = ["__all__"]
 
 
 class ActivityLogSerializer(ModelSerializer):

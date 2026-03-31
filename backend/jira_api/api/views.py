@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework.viewsets import ModelViewSet
+from django_filters.rest_framework import DjangoFilterBackend
 
 from jira_api.models import User, Project, Column, Task, ProjectMembership, Comment, ActivityLog
 from .serializers import UserSerializer, UserCreateSerializer, ProjectSerializer, ColumnSerializer, TaskSerializer, ProjectMembershipSerializer, CommentSerializer, ActivityLogSerializer
@@ -28,6 +29,11 @@ class ColumnViewSet(ModelViewSet):
 class TaskViewSet(ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['column__project__name', 'assigned_to__username']
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
 
 
 class ProjectMembershipViewSet(ModelViewSet):
@@ -38,6 +44,9 @@ class ProjectMembershipViewSet(ModelViewSet):
 class CommentViewSet(ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
 
 
 class ActivityLogViewSet(ModelViewSet):
