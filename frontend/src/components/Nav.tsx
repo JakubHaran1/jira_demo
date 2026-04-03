@@ -42,6 +42,7 @@ export default function Nav() {
       headers: {
         "Content-Type": "application/json",
       },
+
       body: JSON.stringify({ refresh }),
     });
     const data = await response.json();
@@ -50,7 +51,7 @@ export default function Nav() {
     return data.access;
   };
 
-  const fetchAuth = async function (url: string, method: string, data: {}) {
+  const fetchAuth = async function (url: string, method: string, data?: {}) {
     let token = localStorage.getItem("access");
 
     let response = await fetch(url, {
@@ -59,6 +60,8 @@ export default function Nav() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
+      
+      ...(data && { body: JSON.stringify(data) }),
     });
 
     if (response.status === 401 || response.status === 403) {
@@ -75,6 +78,7 @@ export default function Nav() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        ...(data && { body: JSON.stringify(data) }),
       });
     }
     if (!response.ok) {
