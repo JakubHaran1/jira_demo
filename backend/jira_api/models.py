@@ -11,7 +11,6 @@ class User(AbstractUser):
 class Project(models.Model):
     name = models.CharField(max_length=70)
     description = models.TextField(max_length=250)
-
     created_at = models.DateField(auto_now=True)
 
     def __str__(self):
@@ -44,15 +43,15 @@ class Task(models.Model):
 
     title = models.CharField(max_length=150)
     description = models.TextField(max_length=250, null=True)
+    priority = models.CharField(max_length=8, choices=PRIORITY_CHOICES)
+    due_date = models.DateField(auto_now=False, auto_now_add=False)
+    created_at = models.DateField(auto_now_add=True)
     column = models.ForeignKey(
         Column, related_name="tasks", on_delete=models.CASCADE)
     assigned_to = models.ManyToManyField(
         User, related_name="tasks", blank=True)
     created_by = models.ForeignKey(
         User,  on_delete=models.CASCADE)
-    priority = models.CharField(max_length=8, choices=PRIORITY_CHOICES)
-    due_date = models.DateField(auto_now=False, auto_now_add=False)
-    created_at = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return f'{self.title} | {self.column.project.name}'

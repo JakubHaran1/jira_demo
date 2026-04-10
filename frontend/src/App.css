@@ -1,0 +1,22 @@
+.jira-demo {
+  min-height: 105vh;
+}
+.sub-nav button::after {
+  display: block;
+  content: "";
+  width: 0;
+  margin: 2px auto;
+  height: 2px;
+  background-color: white;
+  z-index: 1;
+  transition: 0.3s;
+}
+.sub-nav button:hover::after,
+.sub-nav button.active::after {
+  width: 50%;
+}
+.nav-mobile-main {
+  bottom: 0;
+  position: fixed;
+  width: 100%;
+}

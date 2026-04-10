@@ -1,0 +1,25 @@
+POST http://127.0.0.1:8000/api/token/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "username":"admin",
+    "password":"admin"
+}
+
+
+###
+
+POST http://127.0.0.1:8000/api/token/refresh/ HTTP/1.1
+Content-Type: application/json
+
+
+{
+    "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc3NTI0NTcxNCwiaWF0IjoxNzc1MTU5MzE0LCJqdGkiOiI1MGViMGFkMWExYmQ0N2Q2ODkwNDg4MWIzZDQxNWVmMiIsInVzZXJfaWQiOiJjZTA2ZTcwNC00OTU0LTQxYmItYTVhOC1hZWUwNTNjYjYyNjUifQ.aNADjvUCxLnLsunXrHBOUg5T3S9eBM07PPruEkp5Ixg"
+}
+
+###
+
+GET  http://127.0.0.1:8000/api/users/current_user/ HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc1MTc3Mjc1LCJpYXQiOjE3NzUxNzY5NzUsImp0aSI6IjQwMjlmYzgyMTFhMjRkYjZhNWI0YTY4MTUwMmIwOTBhIiwidXNlcl9pZCI6ImNlMDZlNzA0LTQ5NTQtNDFiYi1hNWE4LWFlZTA1M2NiNjI2NSJ9.s4opAayCwpMTkkVmp0hHZPBtYRbJr57H07ti111so2Q
+

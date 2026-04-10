@@ -1,7 +1,13 @@
 from django.shortcuts import render
 from rest_framework.viewsets import ModelViewSet
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
 
 from jira_api.models import User, Project, Column, Task, ProjectMembership, Comment, ActivityLog
+
 from .serializers import UserSerializer, UserCreateSerializer, ProjectSerializer, ColumnSerializer, TaskSerializer, ProjectMembershipSerializer, CommentSerializer, ActivityLogSerializer
 
 
@@ -13,6 +19,12 @@ class UserViewSet(ModelViewSet):
         if self.action in ["list", "retrieve"]:
             return UserSerializer
         return UserCreateSerializer
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def current_user(self, request):
+        user_serializer = UserSerializer(request.user).data
+
+        return Response(user_serializer)
 
 
 class ProjectViewSet(ModelViewSet):
@@ -28,6 +40,12 @@ class ColumnViewSet(ModelViewSet):
 class TaskViewSet(ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['column__status_type',
+                        'assigned_to__username', 'created_by__username']
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
 
 
 class ProjectMembershipViewSet(ModelViewSet):
@@ -38,6 +56,9 @@ class ProjectMembershipViewSet(ModelViewSet):
 class CommentViewSet(ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
 
 
 class ActivityLogViewSet(ModelViewSet):
