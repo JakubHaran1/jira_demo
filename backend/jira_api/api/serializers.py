@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
+from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField,CharField
 from rest_framework.exceptions import ValidationError
 
 from rest_framework.fields import CharField
@@ -49,12 +49,13 @@ class TaskSerializer(ModelSerializer):
         queryset=User.objects.all(), many=True, write_only=True)
 
     column = PrimaryKeyRelatedField(queryset=Column.objects.all())
+    column_status = CharField(read_only=True,source='column.status_type')
     comments = CommentSerializer(many=True, read_only=True)
 
     class Meta:
         model = Task
         fields = ["id", "title", "description",
-                  "priority", "due_date", "created_at", 'column', "assigned_to_ids", "created_by", "assigned_to", "comments"]
+                  "priority", "due_date", "created_at", 'column','column_status', "assigned_to_ids", "created_by", "assigned_to", "comments"]
 
     def create(self, validated_data):
         ids_data = validated_data.pop("assigned_to_ids", [])
@@ -91,6 +92,8 @@ class ProjectSerializer(ModelSerializer):
 
     def create(self, validated_data):
         request = self.context["request"]
+        
+        # Rozwiązac z tym sprawe:
         project_memberships_data = validated_data.pop("project_memberships")
         project_instance = Project.objects.create(**validated_data)
         ProjectMembership.objects.create(

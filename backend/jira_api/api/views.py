@@ -41,7 +41,7 @@ class TaskViewSet(ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['column__project__name',
+    filterset_fields = ['column__status_type',
                         'assigned_to__username', 'created_by__username']
 
     def perform_create(self, serializer):
