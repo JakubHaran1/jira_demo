@@ -24,4 +24,20 @@ interface TaskType {
   due_date: string;
 }
 
-export type { JWTtypes, ApiResponse, UserType, TaskType };
+interface UserContextType {
+  user: UserType | null;
+  setUser: React.Dispatch<React.SetStateAction<UserType | null>>;
+}
+
+interface LoginTypes {
+  username: string;
+  password: string;
+}
+export type {
+  JWTtypes,
+  ApiResponse,
+  UserType,
+  TaskType,
+  LoginTypes,
+  UserContextType,
+};
