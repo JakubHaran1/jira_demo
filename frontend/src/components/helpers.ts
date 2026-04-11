@@ -1,4 +1,4 @@
-import type { ApiResponse, JWTtypes, UserType } from "./types";
+import type { ApiResponse, JWTtypes, UserType, LoginTypes } from "./types";
 
 const fetchData = async function <T>(
   url: string,
@@ -41,12 +41,12 @@ const fetchData = async function <T>(
   }
 };
 
-async function login() {
+async function login(data: LoginTypes) {
   const response = await fetchData<JWTtypes>(
     "http://127.0.0.1:8000/api/token/",
     "POST",
     { "Content-type": "application/json" },
-    { username: "admin", password: "admin" },
+    { username: data.username, password: data.password },
   );
   if (!response.ok) {
     console.log("Pop up z error login");
